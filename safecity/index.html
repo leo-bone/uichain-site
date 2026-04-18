@@ -327,6 +327,30 @@
     }
     .view-detail-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 
+    /* ─────────── Conflict 风险标签 ─────────── */
+    .conflict-badges {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      margin-top: 10px; padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .conflict-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 8px; border-radius: 4px;
+      font-size: 10px; font-weight: 600; white-space: nowrap;
+    }
+    .conflict-badge.warning {
+      background: rgba(245,158,11,0.15); color: #f59e0b;
+      border: 1px solid rgba(245,158,11,0.3);
+    }
+    .conflict-badge.danger {
+      background: rgba(239,68,68,0.15); color: #ef4444;
+      border: 1px solid rgba(239,68,68,0.3);
+    }
+    .conflict-badge.safe {
+      background: rgba(16,185,129,0.12); color: #10b981;
+      border: 1px solid rgba(16,185,129,0.25);
+    }
+
     /* ─────────── 城市详情页 ─────────── */
     #city-detail-page { display: none; padding-top: 64px; }
     #city-detail-page.active { display: block; }
@@ -1375,6 +1399,35 @@ function getScoreClass(score) {
   return 'score-critical';
 }
 
+// Conflict 风险标签生成
+function getConflictBadges(city) {
+  const data = CITY_DATABASE[city.id];
+  if (!data || !data.conflict) return '';
+  const c = data.conflict;
+  let badges = [];
+
+  // 战争风险
+  if (c.war_risk === '中' || c.war_risk === '高') {
+    badges.push('<span class="conflict-badge danger">⚠️ 战争: ' + c.war_risk + '</span>');
+  } else if (c.war_risk === '低') {
+    badges.push('<span class="conflict-badge warning">⚡ 战争: ' + c.war_risk + '</span>');
+  }
+
+  // 帮派活动
+  if (c.gang_activity === '高' || c.gang_activity === '较高') {
+    badges.push('<span class="conflict-badge danger">⚠️ 帮派: ' + c.gang_activity + '</span>');
+  } else if (c.gang_activity === '中等') {
+    badges.push('<span class="conflict-badge warning">⚡ 帮派: ' + c.gang_activity + '</span>');
+  }
+
+  // 社会动荡
+  if (c.civil_unrest === '高') {
+    badges.push('<span class="conflict-badge warning">⚡ 动荡: ' + c.civil_unrest + '</span>');
+  }
+
+  return badges.join('');
+}
+
 // ─────────────────────────────────────────────────────
 // 首页城市卡片渲染
 // ─────────────────────────────────────────────────────
@@ -1449,6 +1502,9 @@ function renderCityGrid(filterContinent = '全部') {
               </div>
             </div>`;
           }).join('')}
+        </div>
+        <div class="conflict-badges">
+          ${getConflictBadges(city)}
         </div>
         <div class="city-card-footer">
           <div class="city-overall">
@@ -2416,6 +2472,9 @@ function renderSearchResults(results) {
               </div>
             </div>`;
           }).join('')}
+        </div>
+        <div class="conflict-badges">
+          ${getConflictBadges(city)}
         </div>
         <div class="city-card-footer">
           <div class="city-overall">
